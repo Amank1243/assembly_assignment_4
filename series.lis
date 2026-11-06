@@ -1,0 +1,407 @@
+     1                                  
+     2                                  ; Program Name: Assignment 4 - Taylor Series
+     3                                  ; This program demonstrates hybrid programming using C++ and x86-64 assembly
+     4                                  ; to approximate e^x using a Taylor series.
+     5                                  ; Copyright (C) 2026 Aman Khajuria
+     6                                  ;
+     7                                  ; This program is free software: you can redistribute it and/or modify it
+     8                                  ; under the terms of the GNU General Public License version 3 as published
+     9                                  ; by the Free Software Foundation.
+    10                                  ; This program is distributed in the hope that it will be useful, but
+    11                                  ; WITHOUT ANY WARRANTY; without even the implied warranty of
+    12                                  ; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    13                                  ; See the GNU General Public License for more details.
+    14                                  ; A copy of the GNU General Public License v3 is available here:
+    15                                  ; <https://www.gnu.org/licenses/>.
+    16                                  ;
+    17                                  ; Author Information:
+    18                                  ; Name: Aman Khajuria
+    19                                  ; CWID: 812144988
+    20                                  ; Section(s): CPSC 240-#8, CPSC 240-#7
+    21                                  ; Email: akhajuria@csu.fullerton.edu
+    22                                  ;
+    23                                  ; Program Information:
+    24                                  ; Name: Assignment 4 - Taylor Series
+    25                                  ; Languages: C++, x86-64 Assembly, Bash
+    26                                  ; Completion Date: 11/06/2026
+    27                                  ;
+    28                                  ; Program's Purpose:
+    29                                  ; This program approximates e^x using a Taylor series consisting of
+    30                                  ; n+1 terms. It accepts a floating-point value x and an integer n
+    31                                  ; from the user, computes the approximation, and displays the result
+    32                                  ; with eight digits after the decimal point.
+    33                                  ;
+    34                                  ; Project Information:
+    35                                  ; Files: main.cpp, series.asm, taylor.asm, macro.inc, r.sh
+    36                                  ; Status: Complete
+    37                                  ;
+    38                                  ; Execution:
+    39                                  ; Run ./r.sh.
+    40                                  ; The script assembles, compiles, links, and executes the program.
+    41                                  ;
+    42                                  ; File's Purpose:
+    43                                  ; This file contains the series function, which obtains the user's
+    44                                  ; input values x and n, passes them to the taylor function, receives
+    45                                  ; the computed approximation, displays it, and returns the result
+    46                                  ; to the C++ driver.
+    47                                  
+    48                                  
+    49                                  %include "macro.inc"
+    50                              <1> ; Program Name: Assignment 3 - Non-deterministic Random Numbers
+    51                              <1> ; This program demonstrates hybrid programming using C, C++, and x86-64 assembly to
+    52                              <1> ; generate, normalize, display, and sort an array of random 64-bit IEEE 754 floating-point numbers.
+    53                              <1> ; Copyright (C) 2026 Aman Khajuria
+    54                              <1> ;
+    55                              <1> ; This program is free software: you can redistribute it and/or modify it under the terms
+    56                              <1> ; of the GNU General Public License version 3 as published by the Free Software Foundation.
+    57                              <1> ; This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+    58                              <1> ; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+    59                              <1> ; See the GNU General Public License for more details.
+    60                              <1> ; A copy of the GNU General Public License v3 is available here:
+    61                              <1> ; <https://www.gnu.org/licenses/>.
+    62                              <1> ;
+    63                              <1> ; Author Information:
+    64                              <1> ; Name: Aman Khajuria
+    65                              <1> ; CWID: 812144988
+    66                              <1> ; Section(s): CPSC 240-#8, CPSC 240-#7
+    67                              <1> ; Email: akhajuria@csu.fullerton.edu
+    68                              <1> ;
+    69                              <1> ; Program Information:
+    70                              <1> ; Name: Assignment 3 - Non-deterministic Random Numbers
+    71                              <1> ; Languages: C, C++, x86-64 Assembly, Bash
+    72                              <1> ; Completion Date: 10/12/2026
+    73                              <1> ;
+    74                              <1> ; Program's Purpose:
+    75                              <1> ; This program generates an array of random 64-bit IEEE 754 floating-point numbers.
+    76                              <1> ; The program obtains the user's name, title, and requested array size, generates
+    77                              <1> ; random values while rejecting NaN, and displays them in hexadecimal and scientific
+    78                              <1> ; decimal formats. It then normalizes the values to the range 1.0 - 2.0, sorts
+    79                              <1> ; them in ascending order, and displays the final results.
+    80                              <1> ;
+    81                              <1> ; Project Information:
+    82                              <1> ; Files: main.c, executive.asm, fill_random_array.asm, is_nan.asm, show_array.asm,
+    83                              <1> ;        normalize_array.asm, sort.cpp, macro.inc, r.sh
+    84                              <1> ; Status: Complete
+    85                              <1> ;
+    86                              <1> ; Execution:
+    87                              <1> ; Run ./r.sh.
+    88                              <1> ; The script assembles, compiles, links, and executes the program.
+    89                              <1> ;
+    90                              <1> ; File's Purpose:
+    91                              <1> ; This is a macro file that pushes and pops all registers before putting them to use.
+    92                              <1> 
+    93                              <1> 
+    94                              <1> ; ------------------------------------------------------------
+    95                              <1> ; Save the general-purpose registers before modifying them.
+    96                              <1> ; ------------------------------------------------------------
+    97                              <1> 
+    98                              <1> %macro create_activation_record 0
+    99                              <1> 
+   100                              <1>     push rbp
+   101                              <1>     mov rbp, rsp
+   102                              <1> 
+   103                              <1>     push rbx
+   104                              <1>     push rcx
+   105                              <1>     push rdx
+   106                              <1>     push rdi
+   107                              <1>     push rsi
+   108                              <1>     push r8
+   109                              <1>     push r9
+   110                              <1>     push r10
+   111                              <1>     push r11
+   112                              <1>     push r12
+   113                              <1>     push r13
+   114                              <1>     push r14
+   115                              <1>     push r15
+   116                              <1>     pushf
+   117                              <1> 
+   118                              <1> %endmacro
+   119                              <1> 
+   120                              <1> 
+   121                              <1> ; ------------------------------------------------------------
+   122                              <1> ; Restore the saved registers before returning to the caller.
+   123                              <1> ; ------------------------------------------------------------
+   124                              <1> 
+   125                              <1> %macro delete_activation_record 0
+   126                              <1> 
+   127                              <1>     popf
+   128                              <1>     pop r15
+   129                              <1>     pop r14
+   130                              <1>     pop r13
+   131                              <1>     pop r12
+   132                              <1>     pop r11
+   133                              <1>     pop r10
+   134                              <1>     pop r9
+   135                              <1>     pop r8
+   136                              <1>     pop rsi
+   137                              <1>     pop rdi
+   138                              <1>     pop rdx
+   139                              <1>     pop rcx
+   140                              <1>     pop rbx
+   141                              <1>     pop rbp
+   142                              <1> 
+   143                              <1> %endmacro
+    50                                  
+    51                                  extern printf
+    52                                  extern fgets
+    53                                  extern stdin
+    54                                  extern atof
+    55                                  extern atoi
+    56                                  extern taylor
+    57                                  
+    58                                  global series
+    59                                  
+    60                                  maximum_number_of_characters_for_input equ 100
+    61                                  
+    62                                  segment .data
+    63                                  
+    64 00000000 57656C636F6D652074-         welcome_message db "Welcome to Taylor Series by Aman Khajuria.", 10, 0
+    64 00000009 6F205461796C6F7220-
+    64 00000012 536572696573206279-
+    64 0000001B 20416D616E204B6861-
+    64 00000024 6A757269612E0A00   
+    65                                  
+    66 0000002C 0A5468697320736F66-         software_info_message db 10, "This software will compute any power of e that you may need.", 10, 0
+    66 00000035 74776172652077696C-
+    66 0000003E 6C20636F6D70757465-
+    66 00000047 20616E7920706F7765-
+    66 00000050 72206F662065207468-
+    66 00000059 617420796F75206D61-
+    66 00000062 79206E6565642E0A00 
+    67                                  
+    68 0000006B 0A506C656173652065-         x_float_input_msg db 10, "Please enter a float number value for x: ", 0
+    68 00000074 6E746572206120666C-
+    68 0000007D 6F6174206E756D6265-
+    68 00000086 722076616C75652066-
+    68 0000008F 6F7220783A2000     
+    69                                  
+    70 00000096 0A506C656173652065-         number_of_terms_msg db 10, "Please enter the number of terms to include in the Taylor sum: ", 0
+    70 0000009F 6E7465722074686520-
+    70 000000A8 6E756D626572206F66-
+    70 000000B1 207465726D7320746F-
+    70 000000BA 20696E636C75646520-
+    70 000000C3 696E20746865205461-
+    70 000000CC 796C6F722073756D3A-
+    70 000000D5 2000               
+    71                                  
+    72 000000D7 0A5468616E6B20796F-         waiting_message db 10, "Thank you for waiting", 10, 0
+    72 000000E0 7520666F7220776169-
+    72 000000E9 74696E670A00       
+    73                                  
+    74 000000EF 0A54686520636F6D70-         result_message db 10, "The computed approximation of e^x is %.8f with precision of 8 digits right of the point.", 10, 0
+    74 000000F8 757465642061707072-
+    74 00000101 6F78696D6174696F6E-
+    74 0000010A 206F6620655E782069-
+    74 00000113 7320252E3866207769-
+    74 0000011C 746820707265636973-
+    74 00000125 696F6E206F66203820-
+    74 0000012E 646967697473207269-
+    74 00000137 676874206F66207468-
+    74 00000140 6520706F696E742E0A-
+    74 00000149 00                 
+    75                                  
+    76 0000014A 0A5468616E6B20796F-         thank_you_message db 10, "Thank you for using the Khajuria exponential calculator.", 10, 0
+    76 00000153 7520666F7220757369-
+    76 0000015C 6E6720746865204B68-
+    76 00000165 616A75726961206578-
+    76 0000016E 706F6E656E7469616C-
+    76 00000177 2063616C63756C6174-
+    76 00000180 6F722E0A00         
+    77                                  
+    78 00000185 0A506C656173652072-         return_message db 10, "Please return another day. The computed value will be sent to the caller function.", 10, 0
+    78 0000018E 657475726E20616E6F-
+    78 00000197 74686572206461792E-
+    78 000001A0 2054686520636F6D70-
+    78 000001A9 757465642076616C75-
+    78 000001B2 652077696C6C206265-
+    78 000001BB 2073656E7420746F20-
+    78 000001C4 7468652063616C6C65-
+    78 000001CD 722066756E6374696F-
+    78 000001D6 6E2E0A00           
+    79                                  
+    80 000001DA 0A506C656173652065-         invalid_message db 10, "Please enter a positive number of terms.", 10, 0
+    80 000001E3 6E746572206120706F-
+    80 000001EC 736974697665206E75-
+    80 000001F5 6D626572206F662074-
+    80 000001FE 65726D732E0A00     
+    81                                  
+    82 00000205 257300                      string_format db "%s", 0
+    83                                  
+    84                                  segment .bss
+    85                                  
+    86                                      ; String input buffer for fgets
+    87 00000000 <res 64h>                   input_buffer resb 100
+    88                                  
+    89                                  segment .text
+    90                                  
+    91                                  series:
+    92                                  
+    93                                      create_activation_record
+    99                              <1> 
+   100 00000000 55                  <1>  push rbp
+   101 00000001 4889E5              <1>  mov rbp, rsp
+   102                              <1> 
+   103 00000004 53                  <1>  push rbx
+   104 00000005 51                  <1>  push rcx
+   105 00000006 52                  <1>  push rdx
+   106 00000007 57                  <1>  push rdi
+   107 00000008 56                  <1>  push rsi
+   108 00000009 4150                <1>  push r8
+   109 0000000B 4151                <1>  push r9
+   110 0000000D 4152                <1>  push r10
+   111 0000000F 4153                <1>  push r11
+   112 00000011 4154                <1>  push r12
+   113 00000013 4155                <1>  push r13
+   114 00000015 4156                <1>  push r14
+   115 00000017 4157                <1>  push r15
+   116 00000019 9C                  <1>  pushf
+   117                              <1> 
+    94                                  
+    95                                      ; Print welcome message
+    96 0000001A B800000000                  mov rax, 0
+    97 0000001F 48BF-                       mov rdi, string_format
+    97 00000021 [0502000000000000] 
+    98 00000029 48BE-                       mov rsi, welcome_message
+    98 0000002B [0000000000000000] 
+    99 00000033 E8(00000000)                call printf
+   100                                  
+   101                                      ; Print software information
+   102 00000038 B800000000                  mov rax, 0
+   103 0000003D 48BF-                       mov rdi, string_format
+   103 0000003F [0502000000000000] 
+   104 00000047 48BE-                       mov rsi, software_info_message
+   104 00000049 [2C00000000000000] 
+   105 00000051 E8(00000000)                call printf
+   106                                  
+   107                                      ; Ask for x
+   108 00000056 B800000000                  mov rax, 0
+   109 0000005B 48BF-                       mov rdi, string_format
+   109 0000005D [0502000000000000] 
+   110 00000065 48BE-                       mov rsi, x_float_input_msg
+   110 00000067 [6B00000000000000] 
+   111 0000006F E8(00000000)                call printf
+   112                                  
+   113                                      ; Read x as a string
+   114 00000074 48BF-                       mov rdi, input_buffer
+   114 00000076 [0000000000000000] 
+   115 0000007E BE64000000                  mov rsi, maximum_number_of_characters_for_input
+   116 00000083 488B1425[00000000]          mov rdx, [stdin]
+   117 0000008B E8(00000000)                call fgets
+   118                                  
+   119                                      ; Convert x to a double
+   120 00000090 48BF-                       mov rdi, input_buffer
+   120 00000092 [0000000000000000] 
+   121 0000009A E8(00000000)                call atof
+   122                                  
+   123                                      ; Save x in xmm14 without changing its bits
+   124 0000009F F2440F10F0                  movsd xmm14, xmm0
+   125                                  
+   126                                      ; Ask for the number of terms
+   127 000000A4 B800000000                  mov rax, 0
+   128 000000A9 48BF-                       mov rdi, string_format
+   128 000000AB [0502000000000000] 
+   129 000000B3 48BE-                       mov rsi, number_of_terms_msg
+   129 000000B5 [9600000000000000] 
+   130 000000BD E8(00000000)                call printf
+   131                                  
+   132                                      ; Read n as a string
+   133 000000C2 48BF-                       mov rdi, input_buffer
+   133 000000C4 [0000000000000000] 
+   134 000000CC BE64000000                  mov rsi, maximum_number_of_characters_for_input
+   135 000000D1 488B1425[00000000]          mov rdx, [stdin]
+   136 000000D9 E8(00000000)                call fgets
+   137                                  
+   138                                      ; Convert n to an integer
+   139 000000DE 48BF-                       mov rdi, input_buffer
+   139 000000E0 [0000000000000000] 
+   140 000000E8 E8(00000000)                call atoi
+   141                                  
+   142                                      ; Make sure n is positive or zero, as in the formula given n can equal zero
+   143 000000ED 83F800                      cmp eax, 0
+   144 000000F0 0F8C8F000000                jl invalid_input
+   145                                  
+   146                                      ; Save n in r15
+   147 000000F6 4189C7                      mov r15d, eax
+   148                                  
+   149                                      ; Pass x to taylor in xmm0
+   150 000000F9 F2410F10C6                  movsd xmm0, xmm14
+   151                                  
+   152                                      ; Pass n to taylor in rdi
+   153 000000FE 4C89FF                      mov rdi, r15
+   154                                  
+   155                                      ; Call taylor
+   156 00000101 E8(00000000)                call taylor
+   157                                  
+   158                                      ; Save returned double in xmm14
+   159 00000106 F2440F10F0                  movsd xmm14, xmm0
+   160                                  
+   161                                      ; Print waiting message
+   162 0000010B B800000000                  mov rax, 0
+   163 00000110 48BF-                       mov rdi, string_format
+   163 00000112 [0502000000000000] 
+   164 0000011A 48BE-                       mov rsi, waiting_message
+   164 0000011C [D700000000000000] 
+   165 00000124 E8(00000000)                call printf
+   166                                  
+   167                                      ; Print computed approximation
+   168 00000129 F2410F10C6                  movsd xmm0, xmm14
+   169 0000012E B801000000                  mov rax, 1
+   170 00000133 48BF-                       mov rdi, result_message
+   170 00000135 [EF00000000000000] 
+   171 0000013D E8(00000000)                call printf
+   172                                  
+   173                                      ; Print thank you message
+   174 00000142 B800000000                  mov rax, 0
+   175 00000147 48BF-                       mov rdi, string_format
+   175 00000149 [0502000000000000] 
+   176 00000151 48BE-                       mov rsi, thank_you_message
+   176 00000153 [4A01000000000000] 
+   177 0000015B E8(00000000)                call printf
+   178                                  
+   179                                      ; Print return message
+   180 00000160 B800000000                  mov rax, 0
+   181 00000165 48BF-                       mov rdi, string_format
+   181 00000167 [0502000000000000] 
+   182 0000016F 48BE-                       mov rsi, return_message
+   182 00000171 [8501000000000000] 
+   183 00000179 E8(00000000)                call printf
+   184                                  
+   185                                      ; Return the computed double to main.cpp
+   186 0000017E F2410F10C6                  movsd xmm0, xmm14
+   187                                  
+   188 00000183 EB22                        jmp series_done
+   189                                  
+   190                                  invalid_input:
+   191                                  
+   192                                      ; Display invalid input message
+   193 00000185 B800000000                  mov rax, 0
+   194 0000018A 48BF-                       mov rdi, string_format
+   194 0000018C [0502000000000000] 
+   195 00000194 48BE-                       mov rsi, invalid_message
+   195 00000196 [DA01000000000000] 
+   196 0000019E E8(00000000)                call printf
+   197                                  
+   198                                      ; Return 0.0
+   199 000001A3 660FEFC0                    pxor xmm0, xmm0
+   200                                  
+   201                                  series_done:
+   202                                  
+   203                                      delete_activation_record
+   126                              <1> 
+   127 000001A7 9D                  <1>  popf
+   128 000001A8 415F                <1>  pop r15
+   129 000001AA 415E                <1>  pop r14
+   130 000001AC 415D                <1>  pop r13
+   131 000001AE 415C                <1>  pop r12
+   132 000001B0 415B                <1>  pop r11
+   133 000001B2 415A                <1>  pop r10
+   134 000001B4 4159                <1>  pop r9
+   135 000001B6 4158                <1>  pop r8
+   136 000001B8 5E                  <1>  pop rsi
+   137 000001B9 5F                  <1>  pop rdi
+   138 000001BA 5A                  <1>  pop rdx
+   139 000001BB 59                  <1>  pop rcx
+   140 000001BC 5B                  <1>  pop rbx
+   141 000001BD 5D                  <1>  pop rbp
+   142                              <1> 
+   204 000001BE C3                          ret

@@ -17,5 +17,5 @@ g++ -m64 -no-pie -o go.out taylor.o series.o main.o \
     -Wall -z noexecstack -lm
 
 
-echo "The Non-deterministic Random Numbers program will now run"
+echo "The Taylor Series program will now run"
 ./go.out
